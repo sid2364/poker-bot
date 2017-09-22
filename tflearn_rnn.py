@@ -28,6 +28,7 @@ testdata["c5"] = testdata["suit5"]*20 + testdata["card5"]
 # take new cols
 trainX = np.array(traindata[["c1", "c2", "c3", "c4", "c5"]].sort_values(by=1, ascending=False, axis=1))
 trainX.sort()
+trainX = trainX[:, ::-1]
 ttrainY = np.array(traindata[["hand"]])#.flatten()
 #np.ravel(trainY)
 # convert to one-hot for target "hand"
@@ -40,6 +41,7 @@ for i in range(len(ttrainY)):
 # same for test data
 testX = np.array(testdata[["c1", "c2", "c3", "c4", "c5"]].sort_values(by=1, ascending=False, axis=1))
 testX.sort()
+testX = testX[:, ::-1]
 ttestY = np.array(testdata[["hand"]])#.flatten()
 #np.ravel(testY)
 # convert to one-hot for target "hand"
