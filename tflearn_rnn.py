@@ -3,6 +3,8 @@ from tflearn.layers.core import input_data, fully_connected
 from tflearn.data_utils import to_categorical
 import numpy as np
 import pandas
+import tensorflow
+tensorflow.reset_default_graph()
 
 
 cnames = ["suit1", "card1", "suit2", "card2", "suit3", "card3", "suit4", "card4",
@@ -25,25 +27,30 @@ testdata["c5"] = testdata["suit5"]*20 + testdata["card5"]
 
 # take new cols
 trainX = np.array(traindata[["c1", "c2", "c3", "c4", "c5"]].sort_values(by=1, ascending=False, axis=1))
-trainY = np.array(traindata[["hand"]])
+trainX.sort()
+ttrainY = np.array(traindata[["hand"]])#.flatten()
+#np.ravel(trainY)
 # convert to one-hot for target "hand"
-'''
 ttrainY = np.array(traindata[["hand"]])
 trainY = np.zeros((len(ttrainY), 10))
 for i in range(len(ttrainY)):
 	trainY[i, ttrainY[i]] = 1
-'''
+
+
 # same for test data
 testX = np.array(testdata[["c1", "c2", "c3", "c4", "c5"]].sort_values(by=1, ascending=False, axis=1))
-testY = np.array(testdata[["hand"]])
-'''
+testX.sort()
+ttestY = np.array(testdata[["hand"]])#.flatten()
+#np.ravel(testY)
+# convert to one-hot for target "hand"
 ttestY = np.array(testdata[["hand"]])
 testY = np.zeros((len(ttestY), 10))
 for i in range(len(ttestY)):
 	testY[i, ttestY[i]] = 1
-'''
+
 # print(testX.shape)
-print(testY[10:15])
+print(trainX[1:5])
+print(trainY[1:5])
 
 # make the model
 net = tflearn.input_data(shape=[None, 5])
@@ -51,16 +58,15 @@ net = tflearn.fully_connected(net, 32, activation='tanh', regularizer='L2', weig
 net = tflearn.dropout(net, 0.8)
 net = tflearn.fully_connected(net, 64, activation='tanh', regularizer='L2', weight_decay=0.001)
 net = tflearn.dropout(net, 0.8)
-net = tflearn.fully_connected(net, 1, activation='softmax')
-net = tflearn.regression(net)
+net = tflearn.fully_connected(net, 10, activation='softmax')
 sgd = tflearn.SGD(learning_rate=0.1, lr_decay=0.96, decay_step=1000)
 net = tflearn.regression(net, optimizer=sgd,
                          loss='categorical_crossentropy')
 
 # Training
 model = tflearn.DNN(net, tensorboard_verbose=0)
-model.fit(trainX, trainY, n_epoch=10, validation_set=(testX, testY),
-	show_metric=True, run_id="dense_model")
+model.fit(testX, testY, n_epoch=10, validation_set=(trainX, trainY),
+	show_metric=True, run_id="dense_model_new")
 
 model.save("tflearn-poker_rnn.model")
 
