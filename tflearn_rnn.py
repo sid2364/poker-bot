@@ -32,7 +32,6 @@ trainX = trainX[:, ::-1]
 ttrainY = np.array(traindata[["hand"]])#.flatten()
 #np.ravel(trainY)
 # convert to one-hot for target "hand"
-ttrainY = np.array(traindata[["hand"]])
 trainY = np.zeros((len(ttrainY), 10))
 for i in range(len(ttrainY)):
 	trainY[i, ttrainY[i]] = 1
@@ -45,7 +44,6 @@ testX = testX[:, ::-1]
 ttestY = np.array(testdata[["hand"]])#.flatten()
 #np.ravel(testY)
 # convert to one-hot for target "hand"
-ttestY = np.array(testdata[["hand"]])
 testY = np.zeros((len(ttestY), 10))
 for i in range(len(ttestY)):
 	testY[i, ttestY[i]] = 1
@@ -58,7 +56,9 @@ print(trainY[1:5])
 net = tflearn.input_data(shape=[None, 5])
 net = tflearn.fully_connected(net, 32, activation='tanh', regularizer='L2', weight_decay=0.001)
 net = tflearn.dropout(net, 0.8)
-net = tflearn.fully_connected(net, 64, activation='tanh', regularizer='L2', weight_decay=0.001)
+net = tflearn.fully_connected(net, 128, activation='tanh', regularizer='L2', weight_decay=0.001)
+net = tflearn.dropout(net, 0.8)
+net = tflearn.fully_connected(net, 128, activation='tanh')
 net = tflearn.dropout(net, 0.8)
 net = tflearn.fully_connected(net, 10, activation='softmax')
 sgd = tflearn.SGD(learning_rate=0.1, lr_decay=0.96, decay_step=1000)
@@ -67,12 +67,12 @@ net = tflearn.regression(net, optimizer=sgd,
 
 # Training
 model = tflearn.DNN(net, tensorboard_verbose=0)
-model.fit(testX, testY, n_epoch=10, validation_set=(trainX, trainY),
+model.fit(trainX, trainY, n_epoch=10, validation_set=(testX[:1000], testY[:1000]),
 	show_metric=True, run_id="dense_model_new")
 
 model.save("tflearn-poker_rnn.model")
 
 model.load('tflearn-poker_rnn.model')
 
-print("Prediction:", model.predict(np.array([31, 32, 33, 34, 35]).reshape(-1,5)))
+print("Prediction:", model.predict(np.array([35, 34, 33, 32, 31]).reshape(-1,5)))
 #print(test_X[15:19], test_y[15:19])
